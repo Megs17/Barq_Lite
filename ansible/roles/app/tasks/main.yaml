@@ -1,0 +1,141 @@
+
+
+# - name: Ensure OpenJDK 17 is installed
+#   become: true
+#   ansible.builtin.apt:
+#     name: openjdk-17-jdk
+#     state: present
+#     update_cache: yes
+
+# - name: Verify Java installation
+#   ansible.builtin.command: java -version
+#   register: java_version
+#   ignore_errors: yes
+
+# - name: Print Java version
+#   ansible.builtin.debug:
+#     msg: "{{ java_version.stdout }}"
+
+
+
+
+
+# - name: Ensure release directory exists
+#   file:
+#     path: /opt/barq/releases/1.0.0
+#     state: directory
+#     owner: ubuntu
+#     group: ubuntu
+#     mode: "0755"
+#   become: true
+
+
+# - name: Copy application JAR to release directory
+#   copy:
+#     src: demo-0.0.1-SNAPSHOT.jar   
+#     dest: /opt/barq/releases/1.0.0/demo-0.0.1-SNAPSHOT.jar
+#     owner: ubuntu
+#     group: ubuntu
+#     mode: "0744"
+#   become: true
+
+# - name: Create/update symlink for current release
+#   file:
+#     src: /opt/barq/releases/1.0.0
+#     dest: /opt/barq/current
+#     state: link
+#     force: true
+#   become: true
+
+# - name: Copy BARQ systemd service file
+#   become: true
+#   copy:
+#     src: barq.service   
+#     dest: /etc/systemd/system/barq.service
+#     owner: root
+#     group: root
+#     mode: '0644'
+
+# - name: Reload systemd to pick up new service
+#   become: true
+#   systemd:
+#     daemon_reload: true
+
+# - name: Enable and start BARQ service
+#   become: true
+#   systemd:
+#     name: barq
+#     enabled: true
+#     state: started
+
+# - name: Check BARQ service status
+#   become: true
+#   ansible.builtin.command: systemctl is-active barq
+#   register: barq_status
+#   failed_when: barq_status.stdout != "active"
+
+- name: Install prerequisites for Docker repository
+  become: true
+  apt:
+    name: ['apt-transport-https', 'ca-certificates', 'curl', 'gnupg2', 'software-properties-common']
+    update_cache: yes
+
+- name: Add Docker GPG key
+  become: true
+  shell: |
+    curl -fsSL https://download.docker.com/linux/ubuntu/gpg | gpg --dearmor -o /usr/share/keyrings/docker-archive-keyring.gpg
+  args:
+    creates: /usr/share/keyrings/docker-archive-keyring.gpg
+
+- name: Add Docker APT repository
+  become: true
+  apt_repository:
+    repo: "deb [arch=amd64 signed-by=/usr/share/keyrings/docker-archive-keyring.gpg] https://download.docker.com/linux/ubuntu {{ ansible_distribution_release | default('jammy') }} stable"
+    state: present
+    filename: docker
+    update_cache: yes
+
+- name: Install Docker CE
+  become: true
+  apt:
+    name: ['docker-ce', 'docker-ce-cli', 'containerd.io']
+    update_cache: yes
+
+- name: Ensure Docker service is running
+  service:
+        name: docker
+        state: started
+        enabled: yes
+
+
+- name: Check if container exists
+  become: true
+  command: docker ps -a --filter "name=barq-lite" --format "{{'{{'}}.Names{{'}}'}}"
+  register: container_check
+  changed_when: false
+
+
+- name: Run barq-lite container if not exists
+  become: true
+  command: >
+    docker run -d --name barq-lite
+    --restart unless-stopped
+    -p 8080:8080
+    -v /etc/ssl/patrol:/etc/ssl/patrol
+    -v /var/log/barq:/var/log/barq
+    megs17/barq_jar
+  when: container_check.stdout == ""
+
+- name: Check if barq-lite container is running
+  become: true
+  command: docker ps --filter "name=barq-lite" --filter "status=running" --format '{{"{{"}}.Names{{"}}"}}'
+  register: barq_status
+  changed_when: false
+
+
+- name: Fail if barq-lite is not running
+  become: true
+  fail:
+    msg: "barq-lite container is not running!"
+  when: barq_status.stdout == ""
+  

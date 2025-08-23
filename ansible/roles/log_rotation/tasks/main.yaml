@@ -1,0 +1,17 @@
+- name: Copy log rotation script to host
+  ansible.builtin.copy:
+    src: log-lite.sh       
+    dest: /usr/local/bin/log-lite.sh
+    owner: "{{ ansible_user }}"
+    group: "{{ ansible_user }}"
+    mode: '0755'
+  become: true
+
+- name: Schedule log rotation script in cron
+  ansible.builtin.cron:
+    name: "Log rotation for BARQ"
+    user: "{{ ansible_user }}"
+    minute: "10"
+    hour: "1"
+    job: "/usr/local/bin/log-lite.sh"
+  become: true

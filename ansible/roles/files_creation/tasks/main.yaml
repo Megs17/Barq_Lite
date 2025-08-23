@@ -1,0 +1,64 @@
+- name: Ensure /var/log/barq directory exists
+  become: true
+  file:
+    path: /var/log/barq
+    state: directory
+    owner: "{{ ansible_user }}"
+    group: "{{ ansible_user }}"
+    mode: '0755'
+
+- name: Ensure barq.log file exists
+  become: true
+  file:
+    path: /var/log/barq/barq.log
+    state: touch
+    owner: "{{ ansible_user }}"
+    group: "{{ ansible_user }}"
+    mode: '0744'
+
+
+- name: Ensure /etc/ssl/patrol directory exists
+  become: true
+  file:
+    path: /etc/ssl/patrol
+    state: directory
+    owner: "{{ ansible_user }}"
+    group: "{{ ansible_user }}"
+    mode: '0755'
+
+- name: Generate private key
+  become: true
+  command: >
+    openssl genrsa -out /etc/ssl/patrol/patrol.key 2048
+  args:
+    creates: /etc/ssl/patrol/patrol.key
+
+- name: Generate self-signed certificate (5 days validity)
+  become: true
+  command: >
+    openssl req -new -x509 -key /etc/ssl/patrol/patrol.key
+    -out /etc/ssl/patrol/patrol.crt
+    -days 5
+    -subj "/C=EG/ST=Cairo/L=Cairo/O=BARQ/OU=IT/CN={{ ansible_host }}"
+  args:
+    creates: /etc/ssl/patrol/patrol.crt
+
+- name: Generate PKCS#12 bundle
+  become: true
+  command: >
+    openssl pkcs12 -export
+    -in /etc/ssl/patrol/patrol.crt
+    -inkey /etc/ssl/patrol/patrol.key
+    -out /etc/ssl/patrol/patrol.p12
+    -name patrol
+    -password pass:changeit
+  args:
+    creates: /etc/ssl/patrol/patrol.p12
+
+- name: Set ownership of PKCS#12 file
+  become: true
+  file:
+    path: /etc/ssl/patrol/patrol.p12
+    owner: "{{ ansible_user }}"
+    group: "{{ ansible_user }}"
+    mode: '0600'

@@ -1,0 +1,10 @@
+- name: Apply my role to web servers
+  hosts: barq_servers
+  serial: 1
+  roles:
+    - date_setup
+    - files_creation
+    - app
+    - log_rotation
+    - certificate_check
+  

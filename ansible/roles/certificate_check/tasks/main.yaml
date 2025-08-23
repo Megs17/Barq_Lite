@@ -1,0 +1,17 @@
+- name: Copy cert script to host
+  ansible.builtin.copy:
+    src: cert-lite.sh       
+    dest: /usr/local/bin/cert-lite.sh
+    owner: ubuntu
+    group: ubuntu
+    mode: '0755'
+  become: true
+
+- name: Schedule cert check script in cron
+  ansible.builtin.cron:
+    name: "Certificates Check for BARQ"
+    user: ubuntu
+    minute: "10"
+    hour: "1"
+    job: "USER=ubuntu /usr/local/bin/cert-lite.sh >> /var/log/barq/cert-lite-cron.log 2>&1"
+  become: true

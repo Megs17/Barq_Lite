@@ -1,0 +1,13 @@
+[Unit]
+Description=BARQ Lite Java Application
+After=network.target
+
+[Service]
+Type=simple
+User=ubuntu
+WorkingDirectory=/opt/barq/current
+ExecStart=/usr/bin/java -jar /opt/barq/current/demo-0.0.1-SNAPSHOT.jar
+Restart=on-failure
+
+[Install]
+WantedBy=multi-user.target

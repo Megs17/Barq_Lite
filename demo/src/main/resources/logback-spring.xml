@@ -1,0 +1,19 @@
+<configuration>
+    <!-- Remove all default Spring Boot logging -->
+    <root level="OFF"/>
+
+    <!-- Only enable logs from your class -->
+    <logger name="com.example.demo.LoggerTask" level="INFO" additivity="false">
+        <appender-ref ref="FILE"/>
+    </logger>
+
+    <!-- File appender -->
+    <appender name="FILE" class="ch.qos.logback.core.FileAppender">
+        <file>/var/log/barq/barq.log</file>
+        <append>true</append>
+        <encoder>
+            <!-- Only print your message, no timestamp or metadata -->
+            <pattern>%msg%n</pattern>
+        </encoder>
+    </appender>
+</configuration>

@@ -1,0 +1,12 @@
+- name: Set timezone to Egypt (Cairo)
+  become: true
+  ansible.builtin.file:
+    src: /usr/share/zoneinfo/Africa/Cairo
+    dest: /etc/localtime
+    state: link
+
+- name: Update /etc/timezone
+  become: true
+  ansible.builtin.copy:
+    content: "Africa/Cairo\n"
+    dest: /etc/timezone
