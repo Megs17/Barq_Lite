@@ -7,28 +7,30 @@ BARQ Lite is a small Java web application that prints **"Hello Barq"** on port `
 ---
 
 ## Ansible Roles
+
 ansible/
-├── roles
-│   ├── app
-│   │   ├── files
-│   │   ├── tasks
-│   │   └── vars
-│   ├── certificate_check
-│   │   ├── files
-│   │   ├── tasks
-│   │   └── vars
-│   ├── date_setup
-│   │   ├── files
-│   │   ├── tasks
-│   │   └── vars
-│   ├── files_creation
-│   │   ├── files
-│   │   ├── tasks
-│   │   └── vars
-│   └── log_rotation
-│       ├── files
-│       ├── tasks
-│       └── vars
+└── roles/
+    ├── app/
+    │   ├── files/
+    │   ├── tasks/
+    │   └── vars/
+    ├── certificate_check/
+    │   ├── files/
+    │   ├── tasks/
+    │   └── vars/
+    ├── date_setup/
+    │   ├── files/
+    │   ├── tasks/
+    │   └── vars/
+    ├── files_creation/
+    │   ├── files/
+    │   ├── tasks/
+    │   └── vars/
+    └── log_rotation/
+        ├── files/
+        ├── tasks/
+        └── vars/
+
 
 
 ## Deployment Phases
