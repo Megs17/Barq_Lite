@@ -11,7 +11,7 @@
   ansible.builtin.cron:
     name: "Certificates Check for BARQ"
     user: ubuntu
-    minute: "10"
-    hour: "1"
+    minute: "0"
+    hour: "7"
     job: "USER=ubuntu /usr/local/bin/cert-lite.sh >> /var/log/barq/cert-lite-cron.log 2>&1"
   become: true
