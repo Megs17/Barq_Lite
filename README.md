@@ -7,7 +7,7 @@ BARQ Lite is a small Java web application that prints **"Hello Barq"** on port `
 ---
 
 ## Ansible Roles
-
+```
 ansible/
 └── roles/
     ├── app/
@@ -31,7 +31,7 @@ ansible/
         ├── tasks/
         └── vars/
 
-
+```
 
 ## Deployment Phases
 
