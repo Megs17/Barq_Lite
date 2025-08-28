@@ -1,0 +1,28 @@
+trigger:
+- main
+
+pool:
+  name: 'K8s-agent'   # your self-hosted agent pool
+
+steps:
+- script: |
+    echo "Building Docker image..."
+    docker build -t myapp:latest .
+  displayName: 'Build Docker Image'
+
+
+- script: |
+    echo "Logging in to Docker Hub..."
+    echo $(DOCKER_TOKEN) | docker login -u $(DOCKER_USERNAME) --password-stdin
+
+    echo "Tagging image..."
+    docker tag myapp:latest $(DOCKER_USERNAME)/myapp:latest
+
+    echo "Pushing image..."
+    docker push $(DOCKER_USERNAME)/myapp:latest
+  displayName: 'Push Docker Image'
+
+- script: |
+    echo "Applying Kubernetes manifests..."
+    kubectl apply -f deployment.yaml
+  displayName: 'Deploy to Kubernetes'
