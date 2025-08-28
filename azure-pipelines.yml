@@ -26,7 +26,7 @@ steps:
   displayName: 'Build and Push Docker image'
   inputs:
     containerRegistry: 'dockerhub-conn'   # The service connection name
-    repository: 'myapp'                   # Repo name in Docker Hub
+    repository: 'megs17/myapp'                   # Repo name in Docker Hub
     command: 'buildAndPush'
     Dockerfile: '**/Dockerfile'
     tags: |
