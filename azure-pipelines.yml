@@ -11,17 +11,26 @@ steps:
   displayName: 'Build Docker Image'
 
 
-- script: |
-    echo "Logging in to Docker Hub..."
-    echo $(DOCKER_TOKEN) | docker login -u $(DOCKER_USERNAME) --password-stdin
+# - script: |
+#     echo "Logging in to Docker Hub..."
+#     echo $(DOCKER_TOKEN) | docker login -u $(DOCKER_USERNAME) --password-stdin
 
-    echo "Tagging image..."
-    docker tag myapp:latest $(DOCKER_USERNAME)/myapp:latest
+#     echo "Tagging image..."
+#     docker tag myapp:latest $(DOCKER_USERNAME)/myapp:latest
 
-    echo "Pushing image..."
-    docker push $(DOCKER_USERNAME)/myapp:latest
-  displayName: 'Push Docker Image'
+#     echo "Pushing image..."
+#     docker push $(DOCKER_USERNAME)/myapp:latest
+#   displayName: 'Push Docker Image'
 
+- task: Docker@2
+  displayName: 'Build and Push Docker image'
+  inputs:
+    containerRegistry: 'dockerhub-conn'   # The service connection name
+    repository: 'myapp'                   # Repo name in Docker Hub
+    command: 'buildAndPush'
+    Dockerfile: '**/Dockerfile'
+    tags: |
+      latest
 - script: |
     echo "Applying Kubernetes manifests..."
     kubectl apply -f deployment.yaml
