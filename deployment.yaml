@@ -33,4 +33,4 @@ spec:
   ports:
   - port: 8080          # service port
     targetPort: 8080    # container port 
-    nodePort: 31000     # optional: NodePort 
+    nodePort: 32000     # optional: NodePort 
