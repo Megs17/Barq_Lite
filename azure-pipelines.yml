@@ -4,34 +4,43 @@ trigger:
 pool:
   name: 'K8s-agent'   # your self-hosted agent pool
 
-steps:
-- script: |
-    echo "Building Docker image..."
-    docker build -t myapp:latest .
-  displayName: 'Build Docker Image'
+stages:
+# ---------- Stage 1: Build Docker Image ----------
+- stage: Build
+  displayName: "Build Docker Image"
+  jobs:
+  - job: BuildJob
+    steps:
+    - script: |
+        echo "Building Docker image..."
+        docker build -t myapp:latest .
+      displayName: 'Build Docker Image'
 
+# ---------- Stage 2: Push Docker Image ----------
+- stage: Push
+  displayName: "Push Docker Image"
+  dependsOn: Build
+  jobs:
+  - job: PushJob
+    steps:
+    - task: Docker@2
+      displayName: 'Build and Push Docker image'
+      inputs:
+        containerRegistry: 'dockerhub-conn'   # The service connection name
+        repository: 'megs17/myapp'            # Repo name in Docker Hub
+        command: 'buildAndPush'
+        Dockerfile: '**/Dockerfile'
+        tags: |
+          latest
 
-# - script: |
-#     echo "Logging in to Docker Hub..."
-#     echo $(DOCKER_TOKEN) | docker login -u $(DOCKER_USERNAME) --password-stdin
-
-#     echo "Tagging image..."
-#     docker tag myapp:latest $(DOCKER_USERNAME)/myapp:latest
-
-#     echo "Pushing image..."
-#     docker push $(DOCKER_USERNAME)/myapp:latest
-#   displayName: 'Push Docker Image'
-
-- task: Docker@2
-  displayName: 'Build and Push Docker image'
-  inputs:
-    containerRegistry: 'dockerhub-conn'   # The service connection name
-    repository: 'megs17/myapp'                   # Repo name in Docker Hub
-    command: 'buildAndPush'
-    Dockerfile: '**/Dockerfile'
-    tags: |
-      latest
-- script: |
-    echo "Applying Kubernetes manifests..."
-    kubectl apply -f deployment.yaml
-  displayName: 'Deploy to Kubernetes'
+# ---------- Stage 3: Deploy to Kubernetes ----------
+- stage: Deploy
+  displayName: "Deploy to Kubernetes"
+  dependsOn: Push
+  jobs:
+  - job: DeployJob
+    steps:
+    - script: |
+        echo "Applying Kubernetes manifests..."
+        kubectl apply -f deployment.yaml
+      displayName: 'Deploy to Kubernetes'
