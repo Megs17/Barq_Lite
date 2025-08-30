@@ -38,9 +38,14 @@ stages:
   displayName: "Deploy to Kubernetes"
   dependsOn: Push
   jobs:
-  - job: DeployJob
-    steps:
-    - script: |
-        echo "Applying Kubernetes manifests..."
-        kubectl apply -f deployment.yaml
-      displayName: 'Deploy to Kubernetes'
+  - deployment: DeployJob
+    displayName: "Deploy Job"
+    environment: 'k8s-prod'   # 👈 must match the environment you created
+    strategy:
+      runOnce:
+        deploy:
+          steps:
+          - script: |
+              echo "Applying Kubernetes manifests..."
+              kubectl apply -f deployment.yaml
+            displayName: 'Deploy to Kubernetes'
